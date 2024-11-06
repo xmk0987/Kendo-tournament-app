@@ -13,6 +13,7 @@ import api from "api/axios";
 import type { Tournament } from "types/models";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Invitations from "./Invitations";
+import History from "./History";
 
 const Profile: React.FC = () => {
   const [userCreatedTournaments, setUserCreatedTournaments] = useState<
@@ -28,7 +29,8 @@ const Profile: React.FC = () => {
     "games",
     "points",
     "created_t",
-    "invitations"
+    "invitations",
+    "history"
   ] as const;
   const defaultTab = "info";
 
@@ -115,6 +117,7 @@ const Profile: React.FC = () => {
               <Tab label={t("profile.my_points")} value="points" />
               <Tab label={t("profile.created_tournaments")} value="created_t" />
               <Tab label={t("profile.invitations")} value="invitations" />
+              <Tab label={t("profile.history")} value="history" />
             </Tabs>
             {currentTab === "created_t" &&
               userCreatedTournaments.length > 0 && (
@@ -161,6 +164,7 @@ const Profile: React.FC = () => {
       {currentTab === "points" && <ProfilePoints />}
       {currentTab === "created_t" && <CreatedTournaments />}
       {currentTab === "invitations" && <Invitations />}
+      {currentTab === "history" && <History />}
     </Container>
   );
 };
