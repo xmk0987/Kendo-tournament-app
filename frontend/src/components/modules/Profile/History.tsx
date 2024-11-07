@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,22 +7,35 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
+import { useAuth } from "context/AuthContext";
+import type { Tournament } from "types/models";
+import api from "api/axios";
+
 const History: React.FC = () => {
-  function createData(
-    name: string,
-    calories: number,
-    fat: number,
-    carbs: number,
-    protein: number
-  ): {
-    name: string;
-    calories: number;
-    fat: number;
-    carbs: number;
-    protein: number;
-  } {
-    return { name, calories, fat, carbs, protein };
-  }
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const { userId } = useAuth();
+
+  useEffect(() => {
+    const fetchTournaments = async (): Promise<void> => {
+      try {
+        const tournamentsData = await api.tournaments.getAll();
+        const filteredTournaments = tournamentsData.filter((tournament) =>
+          tournament.players.some((player) => player.id === userId)
+        );
+        // Sort tournaments based on startDate
+        filteredTournaments.sort(
+          (a, b) =>
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
+        setTournaments(filteredTournaments);
+        console.log(filteredTournaments);
+      } catch (error) {
+        console.error("Error fetching tournaments:", error);
+      }
+    };
+
+    void fetchTournaments();
+  }, [userId]);
 
   const headers = [
     "Tournament name",
@@ -34,14 +47,6 @@ const History: React.FC = () => {
     "Ties",
     "Points",
     ""
-  ];
-
-  const rows = [
-    createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-    createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-    createData("Eclair", 262, 16.0, 24, 6.0),
-    createData("Cupcake", 305, 3.7, 67, 4.3),
-    createData("Gingerbread", 356, 16.0, 49, 3.9)
   ];
 
   return (
@@ -61,18 +66,15 @@ const History: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow
-                key={row.name}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  {row.name}
+            {tournaments.map((tournament) => (
+              <TableRow key={tournament.name}>
+                <TableCell key={tournament.name}>{tournament.name}</TableCell>
+                <TableCell key={tournament.startDate}>
+                  {new Date(tournament.startDate).toLocaleDateString("en-GB")}
                 </TableCell>
-                <TableCell align="right">{row.calories}</TableCell>
-                <TableCell align="right">{row.fat}</TableCell>
-                <TableCell align="right">{row.carbs}</TableCell>
-                <TableCell align="right">{row.protein}</TableCell>
+                <TableCell key={tournament.endDate}>
+                  {tournament.endDate}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
