@@ -112,7 +112,6 @@ const GameInterface: React.FC = () => {
       if (savedTimer != null) {
         return parseInt(savedTimer);
       }
-      return 0;
     }
     return 0;
   });
