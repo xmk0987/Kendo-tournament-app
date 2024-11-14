@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 
 import { useAuth } from "context/AuthContext";
 import type { Tournament } from "types/models";
 import api from "api/axios";
+import {
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper
+} from "@mui/material";
 
 const History: React.FC = () => {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -89,6 +92,42 @@ const History: React.FC = () => {
     }, 0);
   };
 
+  const getTotalUserMatchCount = (tournaments: Tournament[]): number => {
+    return tournaments.reduce((totalMatches, tournament) => {
+      const userMatches = tournament.matchSchedule.filter((match) =>
+        match.players.some((player) => player.id === userId)
+      ).length;
+      return totalMatches + userMatches;
+    }, 0);
+  };
+
+  const getTotalUserWinsCount = (tournaments: Tournament[]): number => {
+    return tournaments.reduce((totalWins, tournament) => {
+      const userWins = tournament.matchSchedule.filter(
+        (match) => match.winner === userId
+      ).length;
+      return totalWins + userWins;
+    }, 0);
+  };
+
+  const getTotalUserLossesCount = (tournaments: Tournament[]): number => {
+    return tournaments.reduce((totalLosses, tournament) => {
+      const userLosses = tournament.matchSchedule.filter(
+        (match) =>
+          match.players.some((player) => player.id === userId) &&
+          match.winner !== userId
+      ).length;
+      return totalLosses + userLosses;
+    }, 0);
+  };
+
+  const getUserWinPercentage = (tournaments: Tournament[]): number => {
+    const totalMatches = getTotalUserMatchCount(tournaments);
+    const totalWins = getTotalUserWinsCount(tournaments);
+
+    return totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
+  };
+
   const headers = [
     "Tournament name",
     "Date",
@@ -147,6 +186,11 @@ const History: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Typography>{tournaments.length} tournaments</Typography>
+      <Typography>{getTotalUserMatchCount(tournaments)} matches</Typography>
+      <Typography>{getTotalUserWinsCount(tournaments)} wins</Typography>
+      <Typography>{getTotalUserLossesCount(tournaments)} losses</Typography>
+      <Typography>Win-%: {getUserWinPercentage(tournaments)} %</Typography>
     </>
   );
 };
