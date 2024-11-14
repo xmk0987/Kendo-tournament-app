@@ -42,7 +42,7 @@ const History: React.FC = () => {
     "Date",
     "Placement",
     "Matches",
-    " Wins",
+    "Wins",
     "Losses",
     "Ties",
     "Points",
@@ -70,10 +70,11 @@ const History: React.FC = () => {
               <TableRow key={tournament.name}>
                 <TableCell key={tournament.name}>{tournament.name}</TableCell>
                 <TableCell key={tournament.startDate}>
-                  {new Date(tournament.startDate).toLocaleDateString("en-GB")}
+                  {new Date(tournament.startDate).toLocaleDateString("fi-FI")}
                 </TableCell>
                 <TableCell key={tournament.endDate}>
-                  {tournament.endDate}
+                  {tournament.g}
+                
                 </TableCell>
               </TableRow>
             ))}
